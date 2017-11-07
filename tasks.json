@@ -6,7 +6,10 @@
         {
             "taskName": "build",
             "type": "shell",
-            "command": "g++ -g test.cpp -o MainProgram",
+            // "command": "g++ -g Main.cpp -o RSA-build",
+            //"command": "g++ -g ElGamal.cpp -o ElGamal-build",
+            "command": "g++ -g ElGamalPlus.cpp -o ElGamalPlus-build",
+            // "command": "g++ -g Ksyu.cpp -o KSYU-build",
             "group": {
                 "kind": "build",
                 "isDefault": true

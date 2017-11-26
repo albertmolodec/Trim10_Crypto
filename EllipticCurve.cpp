@@ -15,89 +15,78 @@ private:
 	int a;
 	int b;
 	int n;
+	bool is_O;
 
 public:
+	void set_is_O(bool is_O) { this->is_O = is_O; }
+	int get_is_O() { return this->is_O; }
+
 	void set_xy(int x, int y)
 	{
 		this->x = x;
 		this->y = y;
 	}
-	void set_x(int x)	{		this->x = x;	}
-	void set_y(int y)   {		this->y = y;	}
-	void set_abn(int a, int b, int n)
+	void set_x(int x) { this->x = x; }
+	void set_y(int y) { this->y = y; }
+	void set_n(int n) { this->n = n; }
+	void set_ab(int a, int b)
 	{
 		this->a = a;
 		this->b = b;
-		this->n = n;
 	}
-	int get_x()	{ return this->x; }
+	
+	int get_x() { return this->x; }
 	int get_y() { return this->y; }
-	int get_a()	{ return this->a; }
-	int get_b()	{ return this->b; }
-	int get_n()	{ return this->n; }
+	int get_a() { return this->a; }
+	int get_b() { return this->b; }
+	int get_n() { return this->n; }
 
-	ePoint(int x, int y, int a = 1, int b = 3, int n = 41)
+	ePoint(int x, int y, int n, bool is_O, int a = 1, int b = 3)
 	{
-		set_xy(x,y);
-		set_abn(a,b,n);
+		set_xy(x, y);
+		set_n(n);
+		set_ab(a, b);
+		set_is_O(is_O);
 	}
-	ePoint() 
+	ePoint()
 	{
-		set_abn(1,3,41);
+		set_ab(1, 3);
+		set_is_O(false);
 	}
-	~ePoint() {	cout << "Memory has been cleaned." << endl;	}	
+	~ePoint() {}
 
 	ePoint operator = (ePoint p1)
 	{
-		return ePoint(this->x = p1.x, this->y = p1.y, this->a = p1.a, this->b = p1.n, this->n = p1.n);
+		return ePoint(this->x = p1.x, this->y = p1.y, this->n = p1.n, this->is_O = p1.is_O, this->a = p1.a, this->b = p1.b);
 	}
 
-	ePoint operator + (ePoint p2)
+	ePoint operator + (ePoint &p2)
 	{
 		ePoint p3;
+		/*cout << "plus: ";
+		print_point(*this);
+		print_point(p2);*/
 		int lambda = get_lambda(*this, p2);
-		int dx = p2.get_x() - this->get_x();
-		int dy = p2.get_y() - this->get_y();
+		//cout << "lambda = " << lambda << endl;
 
-		if (dx < 0)
-			dx += this->get_n();
-		if (dy > 0)
-			dy += this->get_n();
-		
-		if (lambda < 0)
-			lambda += this->get_n();
+		int x1 = this->get_x();
+		int x2 = p2.get_x();
+		int y1 = this->get_y();
+		int N = this->get_n();		
 
-		p3.set_x( (lambda*lambda - this->get_x() - p2.get_x() ) % this->get_n() );
-		p3.set_y( (lambda * (this->get_x() - p3.get_x()) - this->get_y()) & this->get_n());
+		p3.set_x( mod(lambda * lambda - x1 - x2, N) );
+		p3.set_y( mod((lambda*(x1-p3.get_x())-y1), N) );
+		p3.set_n(N);
 
-		if (p3.get_x() < 0)
-			p3.x += this->get_n();
-		if (p3.get_y() < 0)
-			p3.y += this->get_n();
-
-		return p3;		
+		return p3;
 	}
 
-	// int operator % (int N)
-	// {
-	// 	return mod(this->get_a(), N);
-	// }
-
-	
-
-	int get_lambda(ePoint p1, ePoint p2)
+	ePoint operator * (int count)
 	{
-		int x1 = p1.get_x();
-		int x2 = p2.get_x();
-		int y1 = p1.get_y();
-		int y2 = p2.get_y();
-		int n = p1.get_n();
-		int a = p1.get_n();
-
-		if (x1 == x2 && y1 == y2)
-			return ((3 * x1 * x1 + a) * ext_ev(2 * y1, n)) % n;
-		else
-			return ((y2-y1) * ext_ev(x2-x1, n)) % n;
+		ePoint p3 = *this;
+		for (int i = 1; i < count; i++)
+			p3 = p3 + *this;
+		return p3;
 	}
 
 	int mod(int a, int N)
@@ -108,25 +97,54 @@ public:
 			return N - ((-a) % N);
 	}
 
-	int ext_ev(int a, int mod)
+	int get_lambda(ePoint &p1, ePoint &p2)
 	{
-		int q, r, x1, x2, result;
-		x2 = 1, x1 = 0;
-		while (mod > 0)
+		int x1 = p1.get_x();
+		int x2 = p2.get_x();
+		int y1 = p1.get_y();
+		int y2 = p2.get_y();
+		int n = p1.get_n();
+		int a = p1.get_a();	
+		
+		// TO DO: realize function "==" to compare points p1 and p2
+		if (x1 == x2 && y1 == y2)
 		{
-			q = a / mod, r = a % mod;
-			result = x2 - q * x1;
-			a = mod, mod = r;
-			x2 = x1, x1 = result;
-		}
-		if (x2 < 0)
-		{
-			result = x2 + mod;
+			int inv = ext_ev(2 * y1, n);
+			return (((3 * x1 * x1 + a) * inv) % n);
 		}
 		else
 		{
-			result = x2;
+			int inv = ext_ev(x2 - x1, n);
+			return(((y2 - y1) * inv) % n);
 		}
+	}	
+
+	int ext_ev(int a, int b)
+	{
+		if (a == 0)
+		{
+			this->set_is_O(true);
+			cout << get_is_O() << " ";
+		}
+
+		if (a < 0)
+			a = mod(a, b);
+
+		int mod = b;
+		int q, r, x1, x2, result;
+		x2 = 1, x1 = 0;
+		while (b > 0)
+		{
+			q = a / b, r = a % b;
+			result = x2 - q * x1;
+			a = b, b = r;
+			x2 = x1, x1 = result;
+		}
+		if (x2 < 0)
+			result = x2 + mod;
+		else
+			result = x2;
+
 		return result;
 	}
 
@@ -136,7 +154,7 @@ public:
 			for (int j = 0; j < n; j++)
 				if (((j * j) % n) == ((i * i * i + a * i + b) % n))
 				{
-					ePoint pt(i,j);
+					ePoint pt(i, j, n, false);
 					pts.push_back(pt);
 				}
 	}
@@ -144,10 +162,56 @@ public:
 	static void print_points(vector<ePoint> pts)
 	{
 		for (int i = 0; i < pts.size(); i++)
-			cout << "(" << pts[i].x << "," << pts[i].y << ")" << " ";
+			print_point(pts[i]);
 		cout << endl;
 	}
+
+	static void print_point(ePoint p)
+	{
+		cout << "(" << p.get_x() << "," << p.get_y() << "). Is O? " << p.get_is_O() << endl;
+		//cout << "(" << p.get_x() << "," << p.get_y() << ") ";
+	}
+
+	static int get_iG(vector<ePoint> &pts)
+	{
+		int order = pts.size() + 1;
+		int max = 1;
+
+		for (int i = 1; i < pts.size(); i++)
+			if (order % i == 0)
+				max = i;
+
+		for (int i = 0; i < pts.size(); i++)
+		{
+			cout << i << endl;
+			ePoint temp = pts[i] * max;
+		}
+
+		return max;
+	}
+
+	static void list_O(vector<ePoint> pts)
+	{
+		int j = 0;
+		for (int i = 0; i < pts.size(); i++)
+		{
+			if (pts[i].get_is_O() == true)
+			{
+				ePoint::print_point(pts[i]);
+				j++;
+			}
+		}
+		cout << "=== " << j << " ===" << endl;
+	}
 };
+
+bool is_simple(int n)
+{
+	for (int i = 2; i <= sqrt(n); i++)
+		if (n % i == 0)
+			return false;
+	return true;
+}
 
 int pow(int base, int exp)
 {
@@ -163,35 +227,47 @@ int main()
 	int n = 41;
 
 	vector<ePoint> pts;
-	ePoint default_ePoint(0,0);
-
 	ePoint::get_points(pts, 1, 3, n);
 
 	cout << "Points of Elliptic Curve: " << endl;
 	ePoint::print_points(pts);
 
-	int nA = rand() % (n-3) + 2;
-	int nB = rand() % (n-3) + 2;
-	int pA_x, pA_y, pB_x, pB_y;
+	//int nA = rand() % (n - 3) + 2;
+	//int nB = rand() % (n - 3) + 2;
+	int nA = 3;
+	int nB = 4;	
 	
-	cout << "Curve:\ny^2 = x^3 + x + 3 (mod 41)" << endl;
+	cout << "Curve:" << endl;
+	cout << "y ^ 2 = x ^ 3 + x + 3 (mod 41)" << endl;
 	cout << "a = 1, b = 3, N = 41" << endl;
 
-	cout << "Group order: " << pts.size() + 1 << endl << endl ; // +1, because O  
-	int iG = rand() % pts.size(); // genarate random G point
-	
-	cout << "Generating point G...\nG = (" << pts[iG].get_x() << ", " << pts[iG].get_y() << ")" << endl;
+	int group_order = pts.size() + 1;
+	cout << "Group order: " << group_order << endl << endl; // +1, because O  
+	//int iG = rand() % pts.size(); // generate random G point
+	int iG = 2;
+
+	cout << "Generating point G... " << endl;
+	int iG_temp = ePoint::get_iG(pts);
+	cout << "iG = " << iG_temp << ". pts[iG] = ";
+	ePoint::print_point(pts[iG_temp]);
+	ePoint::print_points(pts);
+
+
+	cout << endl << "List of good points: " << endl;
+	cout << endl;
+	ePoint::list_O(pts);
 
 	cout << "Alice randomly selects private key (nA < N): " << nA << endl;
 	cout << "Bob randomly selects private key (nB < N): " << nB << endl << endl;
 
-	cout << "Testing sum... (" << (default_ePoint+pts[iG]).get_x() << ", " << (default_ePoint+pts[iG]).get_y() << ")" << endl;
-
-	// multi_point(pA_x, pA_y, p[iG * 2], p[iG * 2 + 1], a, n, nA);
-	// multi_point(pB_x, pB_y, p[iG * 2], p[iG * 2 + 1], a, n, nB);
- 
-	// cout << "Alice calculates her public key: (" << pA_x << ", " << pA_y << ")" << endl;
-	// cout << "Bob calculates his public key: (" << pB_x << ", " << pB_y << ")" << endl << endl;
+	cout << "Alice calculates her public key: ";
+	ePoint pA = pts[iG] * nA;
+	ePoint::print_point(pA);
+	cout << endl;
+	cout << "Bob calculates his public key: ";
+	ePoint pB = pts[iG] * nB;
+	ePoint::print_point(pB);
+	cout << endl;
 
 	// int KA_x, KA_y, KB_x, KB_y;
 
@@ -206,4 +282,7 @@ int main()
 	// 	cout << "Keys are the same. Success!" << endl;
 	// else
 	// 	cout << "Keys are the different. Wrong!" << endl;
+
+
+	system("pause");
 }

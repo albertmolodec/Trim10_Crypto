@@ -221,10 +221,10 @@ int main()
 	
 	ePoint::make_points(pts, 1, 3, n);
 
-	cout << "Points of Elliptic Curve: " << endl;
-	ePoint::print_points(pts);	
+	/*cout << "Points of Elliptic Curve: " << endl;
+	ePoint::print_points(pts);	*/
 	
-	cout << endl << "Curve:" << endl;
+	cout << "Curve:" << endl;
 	cout << "y^2 = x^3 + x + 3 (mod 41)" << endl;
 	cout << "a = 1, b = 3, N = 41" << endl;
 

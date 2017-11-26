@@ -70,12 +70,8 @@ public:
 	ePoint operator + (ePoint &p2)
 	{
 		ePoint p3;
-		/*cout << "plus: ";
-		print_point(*this);
-		print_point(p2);*/
 		bool is_good = false;
 		int lambda = get_lambda(*this, p2, is_good);
-		//cout << "lambda = " << lambda << endl;
 
 		int x1 = this->get_x();
 		int x2 = p2.get_x();
@@ -118,7 +114,7 @@ public:
 		int a = p1.get_a();
 		
 		// TO DO: realize function "==" to compare points p1 and p2
-		if (x1 == x2 && y1 == y2)
+		if (p1 == p2)
 		{
 			int inv = ext_ev(2 * y1, n);
 			if (2 * y1 == 0)
@@ -202,13 +198,6 @@ public:
 				good_pts.push_back(i);
 		}
 
-	/*	cout << "Good points: ";
-		for (int i = 0; i < good_pts.size(); i++)
-		{
-			ePoint::print_point(pts[good_pts[i]]);
-		}
-		cout << endl;*/
-
 		int iG = rand() % good_pts.size();
 
 		return good_pts[iG];
@@ -233,9 +222,7 @@ int main()
 	ePoint::make_points(pts, 1, 3, n);
 
 	cout << "Points of Elliptic Curve: " << endl;
-	ePoint::print_points(pts);
-
-	
+	ePoint::print_points(pts);	
 	
 	cout << endl << "Curve:" << endl;
 	cout << "y^2 = x^3 + x + 3 (mod 41)" << endl;

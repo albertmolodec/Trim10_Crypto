@@ -17,7 +17,7 @@ private:
 	int n;
 
 public:
-	bool good;
+	bool is_good;
 
 	void set_xy(int x, int y)
 	{
@@ -44,19 +44,19 @@ public:
 		set_xy(x, y);
 		set_n(n);
 		set_ab(a, b);
-		this->good = good;
+		this->is_good = good;
 	}
 	ePoint()
 	{
 		set_ab(1, 3);
-		set_n(41);
-		this->good = false;
+		set_n(109);
+		this->is_good = false;
 	}
 	~ePoint() {}
 
 	ePoint operator = (ePoint p1)
 	{
-		return ePoint(this->x = p1.x, this->y = p1.y, this->n = p1.n, this->good = p1.good, this->a = p1.a, this->b = p1.b);
+		return ePoint(this->x = p1.x, this->y = p1.y, this->n = p1.n, this->is_good = p1.is_good, this->a = p1.a, this->b = p1.b);
 	}
 
 	bool operator == (ePoint &p)
@@ -81,7 +81,7 @@ public:
 		p3.set_x(mod(lambda * lambda - x1 - x2, N));
 		p3.set_y(mod((lambda*(x1 - p3.get_x()) - y1), N));
 		p3.set_n(N);
-		p3.good = is_good;
+		p3.is_good = is_good;
 
 		return p3;
 	}
@@ -113,7 +113,6 @@ public:
 		int n = p1.get_n();
 		int a = p1.get_a();
 
-		// TO DO: realize function "==" to compare points p1 and p2
 		if (p1 == p2)
 		{
 			int inv = ext_ev(2 * y1, n);
@@ -161,7 +160,7 @@ public:
 	{
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++)
-				if (((j * j) % n) == ((i * i * i + a * i + b) % n))
+				if (mods((j * j), n) == mods((i * i * i + a * i + b), n))
 				{
 					ePoint pt(i, j, n, false);
 					pts.push_back(pt);
@@ -187,14 +186,14 @@ public:
 		vector<int> good_pts;
 
 		for (int i = 1; i < pts.size(); i++)
-			if (order % i == 0 && is_simple(i) == true)
+			if (order % i == 0)
 				max = i;
 		max_suborder = max;
 
 		for (int i = 0; i < pts.size(); i++)
 		{
 			ePoint temp = pts[i] * max;
-			if (temp.good == true)
+			if (temp.is_good == true)
 				good_pts.push_back(i);
 		}
 
@@ -203,12 +202,12 @@ public:
 		return good_pts[iG];
 	}
 
-	static bool is_simple(int n)
+	static int mods(int a, int N)
 	{
-		for (int i = 2; i <= sqrt(n); i++)
-			if (n % i == 0)
-				return false;
-		return true;
+		if (a >= 0)
+			return a % N;
+		else
+			return N - ((-a) % N);
 	}
 };
 
@@ -255,7 +254,7 @@ int get_hash(string s, int mod)
 int main()
 {
 	srand(time(NULL));
-	int p = 41; // Field
+	int p = 109; // Field
 	int n; // PUBLIC KEY
 	vector<ePoint> pts; // PUBLIC KEY
 	ePoint::make_points(pts, 1, 3, p);
